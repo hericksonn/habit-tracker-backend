@@ -1,11 +1,47 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+// Define o cliente do Prisma
 generator client {
   provider = "prisma-client-js"
 }
 
+// Define a fonte de dados
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// Modelo para um usuário
+model User {
+  id       Int       @id @default(autoincrement())
+  username String    @unique
+  password String    // Aqui, você armazenaria um hash da senha, não a senha em texto plano.
+  habits   Habit[]
+}
+
+// Modelo para um hábito
+model Habit {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  icon        String?
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id])
+  completions Completion[]
+  reminders   Reminder[]
+}
+
+// Modelo para registrar a conclusão de um hábito
+model Completion {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  habitId   Int
+  habit     Habit    @relation(fields: [habitId], references: [id])
+}
+
+// Modelo para um lembrete (opcional, caso exista essa funcionalidade)
+model Reminder {
+  id        Int      @id @default(autoincrement())
+  habitId   Int
+  time      DateTime
+  habit     Habit    @relation(fields: [habitId], references: [id])
+}
+
